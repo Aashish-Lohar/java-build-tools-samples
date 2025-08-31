@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+description = 'A demo project to practice different build tools'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JUnit for testing
+    testImplementation 'junit:junit:4.13.2'
+}
+
+application {
+    mainClass = 'com.example.demo.App'
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.example.demo.App'
+        )
+    }
+}
+
+// Task to create fat/uber jar
+task fatJar(type: Jar) {
+    archiveClassifier = 'all'
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest {
+        attributes 'Main-Class': 'com.example.demo.App'
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Custom tasks for demo purposes
+task printProjectInfo {
+    doLast {
+        println "Project: ${project.name}"
+        println "Group: ${project.group}"
+        println "Version: ${project.version}"
+        println "Description: ${project.description}"
+    }
+}
+
+// Hook to standard tasks
+build.dependsOn printProjectInfo
